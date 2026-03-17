@@ -52,40 +52,66 @@ function rapportMensuel(transactions) {
     return transactions.reduce((acc, t) => {
         const mois = getMonth(t.date);
         if (!acc[mois]) {
-            acc[mois] = {mois, nombreTransactions: 0, totalHT: 0, totalTVA: 0, totalTTC: 0, transactionMax: 0 }
+            acc[mois] = { mois, nombreTransactions: 0, totalHT: 0, totalTVA: 0, totalTTC: 0, transactionMax: 0 }
         }
         acc[mois].nombreTransactions++;
-        acc[mois].totalHT+=tontant;
-        acc[mois].totalTVA+=totalHT *0.20;
-        acc[mois].totalTTC+=totalHT + totalTVA;
-        acc[mois].transactionMax=Math.max(acc[mois].transactionMax, t.montant);
+        acc[mois].totalHT += tontant;
+        acc[mois].totalTVA += totalHT * 0.20;
+        acc[mois].totalTTC += totalHT + totalTVA;
+        acc[mois].transactionMax = Math.max(acc[mois].transactionMax, t.montant);
         return acc;
 
     }, {}).sort((a, b) => a.mois.localeCompare(b.mois));
 }
 
 function top3Clients(transactions) {
-    return transactions.reduce((acc,t)=>{
-        if(!acc[t.clientId]){
-            acc[t.clientId]={nom : t.nom, total :0, nombreAchats:0 };
+    return transactions.reduce((acc, t) => {
+        if (!acc[t.clientId]) {
+            acc[t.clientId] = { nom: t.nom, total: 0, nombreAchats: 0 };
         }
-        acc[t.clientId].total+=montant;
+        acc[t.clientId].total += montant;
         acc[t.clientId].nombreAchats++;
         return acc;
-    },{}).sort((a, b) => a.total - b.total).limit(3);
+    }, {}).sort((a, b) => a.total - b.total).limit(3);
 }
-/**
- * 3. evolutionMensuelle(transactions)
- *    Retourner un tableau indiquant pour chaque mois (sauf le premier)
- *    le pourcentage d'evolution du CA vs le mois precedent.
- *    Format : [{ mois, totalHT, evolution }]
- *    evolution est un nombre arrondi a 1 decimale (ex: +12.3 ou -5.7) */
+
 function evolutionMensuelle(transactions) {
-    
+
+    const grouped = transactions.reduce((acc, t) => {
+        const mois = getMonth(t.date);
+
+        if (!acc[mois]) {
+            acc[mois] = { mois, totalHT: 0 };
+        }
+
+        acc[mois].totalHT += t.montant;
+
+        return acc;
+    }, {});
+
+    const sorted = Object.values(grouped)
+        .sort((a, b) => a.mois.localeCompare(b.mois));
+
+    const result = [];
+
+    for (let i = 1; i < sorted.length; i++) {
+        const current = sorted[i];
+        const previous = sorted[i - 1];
+
+        const evolution = ((current.totalHT - previous.totalHT) / previous.totalHT) * 100;
+
+        result.push({
+            mois: current.mois,
+            totalHT: current.totalHT,
+            evolution: Number(evolution.toFixed(1))
+        });
+    }
+
+    return result;
 }
 
 function detecterAnomalies(transactions) {
-    // TODO
+    
 }
 
 // Tests
