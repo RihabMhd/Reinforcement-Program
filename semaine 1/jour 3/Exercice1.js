@@ -61,35 +61,112 @@ const entrepot = {
 
 function trouverProduit(entrepot, idProduit) {
   for (const zone in entrepot) {
-    const rayons = entrepot[zone];
+    for (const rayon in entrepot[zone]) {
+      const produit = entrepot[zone][rayon].find(p => p.id === idProduit);
 
-    for (const rayon in rayons) {
-      const produits = rayons[rayon];
-
-      const produit = produits.find(p => p.id === idProduit);
       if (produit) {
-        return produit; 
+        return { produit, zone, rayon };
       }
     }
   }
-
   return null;
 }
 
 function produitsStockCritique(entrepot, seuilMinimum) {
-  // TODO
+  const result = [];
+
+  for (const zone in entrepot) {
+    for (const rayon in entrepot[zone]) {
+      const produits = entrepot[zone][rayon];
+
+      produits.forEach(p => {
+        if (p.stock <= seuilMinimum) {
+          result.push({
+            ...p,
+            zone,
+            rayon
+          });
+        }
+      });
+    }
+  }
+
+  return result;
 }
 
 function valeurTotaleEntrepot(entrepot) {
-  // TODO
+  let total = 0;
+
+  for (const zone in entrepot) {
+    for (const rayon in entrepot[zone]) {
+      const produits = entrepot[zone][rayon];
+
+      produits.forEach(p => {
+        total += p.stock * p.prixUnitaire;
+      });
+    }
+  }
+
+  return total;
 }
 
 function deplacerProduit(entrepot, idProduit, nouvelleZone, nouveauRayon) {
-  // TODO
+  const copy = JSON.parse(JSON.stringify(entrepot));
+
+  let produitDeplace = null;
+
+  for (const zone in copy) {
+    for (const rayon in copy[zone]) {
+      const index = copy[zone][rayon].findIndex(p => p.id === idProduit);
+
+      if (index !== -1) {
+        produitDeplace = copy[zone][rayon].splice(index, 1)[0];
+      }
+    }
+  }
+
+  if (!produitDeplace) return copy;
+
+  if (!copy[nouvelleZone]) {
+    copy[nouvelleZone] = {};
+  }
+
+  if (!copy[nouvelleZone][nouveauRayon]) {
+    copy[nouvelleZone][nouveauRayon] = [];
+  }
+
+  copy[nouvelleZone][nouveauRayon].push(produitDeplace);
+
+  return copy;
 }
 
 function rapportParZone(entrepot) {
-  // TODO
+  const result = [];
+
+  for (const zone in entrepot) {
+    let nombreProduits = 0;
+    let valeurTotale = 0;
+    let references = new Set();
+
+    for (const rayon in entrepot[zone]) {
+      const produits = entrepot[zone][rayon];
+
+      produits.forEach(p => {
+        nombreProduits += p.stock;
+        valeurTotale += p.stock * p.prixUnitaire;
+        references.add(p.id);
+      });
+    }
+
+    result.push({
+      zone,
+      nombreProduits,
+      nombreReferences: references.size,
+      valeurTotale
+    });
+  }
+
+  return result;
 }
 
 // Tests
