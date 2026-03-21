@@ -102,23 +102,96 @@ const sprints = [
 ];
 
 function chargerSprint(sprints, idSprint) {
-  // TODO
+  const sprint = sprints.find(s => s.id === idSprint);
+  if (!sprint) return null;
+
+  const total = sprint.stories.length;
+
+  const done = sprint.stories.filter(st => st.statut === 'done').length;
+
+  const completion = total === 0 ? 0 : Math.round((done / total) * 100);
+
+  return {
+    ...sprint,
+    completion
+  };
 }
 
 function storiesBloquees(sprints) {
-  // TODO
+  const result = [];
+
+  sprints.forEach(sprint => {
+    if (!sprint.actif) return;
+
+    sprint.stories.forEach(story => {
+      if (story.statut === 'bloque') {
+        result.push({
+          ...story,
+          nomSprint: sprint.nom,
+          idSprint: sprint.id
+        });
+      }
+    });
+  });
+
+  return result;
 }
 
 function velociteParSprint(sprints) {
-  // TODO
+  return sprints.map(sprint => {
+    const storiesDone = sprint.stories.filter(s => s.statut === 'done');
+
+    const velocite = storiesDone.reduce((acc, s) => acc + s.points, 0);
+
+    return {
+      idSprint: sprint.id,
+      nom: sprint.nom,
+      velocite,
+      storiesDone: storiesDone.length,
+      totalStories: sprint.stories.length
+    };
+  });
 }
 
 function rechercherStory(sprints, motCle) {
-  // TODO
+  const result = [];
+  const search = motCle.toLowerCase();
+
+  sprints.forEach(sprint => {
+    sprint.stories.forEach(story => {
+      const texte = (story.titre + ' ' + story.description).toLowerCase();
+
+      if (texte.includes(search)) {
+        result.push({
+          idSprint: sprint.id,
+          nomSprint: sprint.nom,
+          story
+        });
+      }
+    });
+  });
+
+  return result;
 }
 
 function tachesSansResponsable(sprints) {
-  // TODO
+  const result = [];
+
+  sprints.forEach(sprint => {
+    sprint.stories.forEach(story => {
+      story.taches.forEach(tache => {
+        if (!tache.assignee) {
+          result.push({
+            storyId: story.id,
+            storyTitre: story.titre,
+            tache
+          });
+        }
+      });
+    });
+  });
+
+  return result;
 }
 
 // Tests
