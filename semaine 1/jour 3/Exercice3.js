@@ -40,70 +40,124 @@ const etudiants = [
   {
     id: 'ETU01', nom: 'Alami', prenom: 'Karim',
     notes: [
-      { module: 'Algorithmique',  note: 14, coeff: 4 },
-      { module: 'PHP POO',        note: 12, coeff: 4 },
-      { module: 'JavaScript',     note: 16, coeff: 3 },
-      { module: 'BDD SQL',        note: 11, coeff: 3 },
-      { module: 'HTML/CSS',       note: 15, coeff: 2 },
-      { module: 'Projet',         note: 13, coeff: 4 },
+      { module: 'Algorithmique', note: 14, coeff: 4 },
+      { module: 'PHP POO', note: 12, coeff: 4 },
+      { module: 'JavaScript', note: 16, coeff: 3 },
+      { module: 'BDD SQL', note: 11, coeff: 3 },
+      { module: 'HTML/CSS', note: 15, coeff: 2 },
+      { module: 'Projet', note: 13, coeff: 4 },
     ]
   },
   {
     id: 'ETU02', nom: 'Benali', prenom: 'Sara',
     notes: [
-      { module: 'Algorithmique',  note: 7,  coeff: 4 },
-      { module: 'PHP POO',        note: 9,  coeff: 4 },
-      { module: 'JavaScript',     note: 11, coeff: 3 },
-      { module: 'BDD SQL',        note: 8,  coeff: 3 },
-      { module: 'HTML/CSS',       note: 14, coeff: 2 },
-      { module: 'Projet',         note: 10, coeff: 4 },
+      { module: 'Algorithmique', note: 7, coeff: 4 },
+      { module: 'PHP POO', note: 9, coeff: 4 },
+      { module: 'JavaScript', note: 11, coeff: 3 },
+      { module: 'BDD SQL', note: 8, coeff: 3 },
+      { module: 'HTML/CSS', note: 14, coeff: 2 },
+      { module: 'Projet', note: 10, coeff: 4 },
     ]
   },
   {
     id: 'ETU03', nom: 'Chraibi', prenom: 'Omar',
     notes: [
-      { module: 'Algorithmique',  note: 4,  coeff: 4 },
-      { module: 'PHP POO',        note: 15, coeff: 4 },
-      { module: 'JavaScript',     note: 13, coeff: 3 },
-      { module: 'BDD SQL',        note: 16, coeff: 3 },
-      { module: 'HTML/CSS',       note: 18, coeff: 2 },
-      { module: 'Projet',         note: 14, coeff: 4 },
+      { module: 'Algorithmique', note: 4, coeff: 4 },
+      { module: 'PHP POO', note: 15, coeff: 4 },
+      { module: 'JavaScript', note: 13, coeff: 3 },
+      { module: 'BDD SQL', note: 16, coeff: 3 },
+      { module: 'HTML/CSS', note: 18, coeff: 2 },
+      { module: 'Projet', note: 14, coeff: 4 },
     ]
   },
   {
     id: 'ETU04', nom: 'Drissi', prenom: 'Fatima',
     notes: [
-      { module: 'Algorithmique',  note: 17, coeff: 4 },
-      { module: 'PHP POO',        note: 18, coeff: 4 },
-      { module: 'JavaScript',     note: 16, coeff: 3 },
-      { module: 'BDD SQL',        note: 19, coeff: 3 },
-      { module: 'HTML/CSS',       note: 17, coeff: 2 },
-      { module: 'Projet',         note: 18, coeff: 4 },
+      { module: 'Algorithmique', note: 17, coeff: 4 },
+      { module: 'PHP POO', note: 18, coeff: 4 },
+      { module: 'JavaScript', note: 16, coeff: 3 },
+      { module: 'BDD SQL', note: 19, coeff: 3 },
+      { module: 'HTML/CSS', note: 17, coeff: 2 },
+      { module: 'Projet', note: 18, coeff: 4 },
     ]
   },
   {
     id: 'ETU05', nom: 'Ennaji', prenom: 'Youssef',
     notes: [
-      { module: 'Algorithmique',  note: 6,  coeff: 4 },
-      { module: 'PHP POO',        note: 7,  coeff: 4 },
-      { module: 'JavaScript',     note: 9,  coeff: 3 },
-      { module: 'BDD SQL',        note: 5,  coeff: 3 },
-      { module: 'HTML/CSS',       note: 12, coeff: 2 },
-      { module: 'Projet',         note: 8,  coeff: 4 },
+      { module: 'Algorithmique', note: 6, coeff: 4 },
+      { module: 'PHP POO', note: 7, coeff: 4 },
+      { module: 'JavaScript', note: 9, coeff: 3 },
+      { module: 'BDD SQL', note: 5, coeff: 3 },
+      { module: 'HTML/CSS', note: 12, coeff: 2 },
+      { module: 'Projet', note: 8, coeff: 4 },
     ]
   },
 ];
-
+/*La moyenne generale = somme(note * coeff) / somme(coeff)*/
 function calculerMoyenne(etudiant) {
-  // TODO
-}
+  const etu = etudiants.find(e => e.id === etudiant);
+  let total = 0;
+  let totalCoeff = 0;
+  etu.notes.forEach(n => {
+    total += n.note * n.coeff;
+    totalCoeff += n.coeff;
+  });
+  return total / totalCoeff;
 
-function determinerStatut(etudiant) {
-  // TODO
 }
+// - Mention : TB >= 16, B >= 14, AB >= 12, P >= 10, Echec < 10
+function determinerStatut(idEtudiant) {
+  const etu = etudiants.find(e => e.id === idEtudiant);
+  const moyenne = calculerMoyenne(idEtudiant);
 
+  const modulesEliminatoires = etu.notes
+    .filter(n => n.note < 5)
+    .map(n => n.module);
+
+  let mention;
+  if (moyenne >= 16) mention = 'TB';
+  else if (moyenne >= 14) mention = 'B';
+  else if (moyenne >= 12) mention = 'AB';
+  else if (moyenne >= 10) mention = 'P';
+  else mention = 'Echec';
+  let statut;
+  if (modulesEliminatoires.length > 0) {
+    statut = 'elimine';
+  } else if (moyenne < 8) {
+    statut = 'exclu';
+  } else if (moyenne < 10) {
+    statut = 'rattrapage';
+  } else {
+    statut = 'admis';
+  }
+
+  return {
+    moyenne: Number(moyenne.toFixed(2)),
+    mention,
+    statut,
+    modulesEliminatoires
+  };
+}
+/* 3. classementPromotion(etudiants)
+ *    Retourner le tableau trie par moyenne decroissante avec rang. */
 function classementPromotion(etudiants) {
-  // TODO
+  const liste = etudiants.map(e => {
+    const statut = determinerStatut(e.id);
+
+    return {
+      id: e.id,
+      nom: e.nom,
+      prenom: e.prenom,
+      moyenne: statut.moyenne
+    };
+  });
+
+  liste.sort((a, b) => b.moyenne - a.moyenne);
+
+  return liste.map((e, index) => ({
+    ...e,
+    rang: index + 1
+  }));
 }
 
 function statistiquesModule(etudiants, nomModule) {
