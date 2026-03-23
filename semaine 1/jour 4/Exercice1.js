@@ -45,17 +45,37 @@ let registre = [
   { id: 7, nom: 'Ghazali Mehdi',  email: 'm.ghazali@pro.ma',  ville: 'Rabat',      formule: 'business',tarif: 199, statut: 'expire',   dateExpiration: '2024-02-28' },
   { id: 8, nom: 'Hamdaoui Nadia', email: 'n.hmdaoui@web.ma',  ville: 'Tanger',     formule: 'basic',   tarif: 49,  statut: 'actif',    dateExpiration: '2024-07-15' },
 ];
-
 function ajouterAbonne(registre, abonne) {
-  // TODO
+  const existe = registre.some(r => r.email === abonne.email);
+  if (existe) {
+    throw new Error("Email deja existant");
+  }
+  const newId = Math.max(...registre.map(r => r.id)) + 1;
+  const nouvelAbonne = {
+    ...abonne,
+    id: newId
+  };
+  return [...registre, nouvelAbonne];
 }
 
 function mettreAJourAbonne(registre, id, modifications) {
-  // TODO
+  const existe = registre.some(a => a.id === id);
+  if (!existe) {
+    throw new Error("Abonne introuvable");
+  }
+
+  return registre.map(a => 
+    a.id === id ? { ...a, ...modifications } : a
+  );
 }
 
 function supprimerAbonne(registre, id) {
-  // TODO
+  const existe = registre.some(a => a.id === id);
+  if (!existe) {
+    throw new Error("Abonne introuvable");
+  }
+
+  return registre.filter(a => a.id !== id);
 }
 
 function renouvelerAbonnements(registre, dateReference) {
