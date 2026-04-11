@@ -63,6 +63,140 @@
  */
 
 // Votre implementation ci-dessous
+class Abonnement
+{
+    public string $type;
+    public float $prixMensuel;
+    public ?int $maxSeancesParSemaine;
+    public bool $accesSauna;
+
+    public function getDescription(): string
+    {
+        $max = $this->maxSeancesParSemaine ?? "Illimité";
+        $sauna = $this->accesSauna ? "Oui" : "Non";
+        return "{$this->type} | {$this->prixMensuel} DH | {$max} séances | Sauna: {$sauna}";
+    }
+}
+
+class Membre
+{
+    public string $nom;
+    public string $prenom;
+    public string $email;
+    public Abonnement $abonnement;
+    public DateTime $dateDebut;
+    public DateTime $dateFin;
+    public int $seancesCetteSemaine = 0;
+    public bool $actif = true;
+
+
+    public function estAbonnementValide(): bool {
+        $today = new DateTime();
+        return $this->actif && $this->dateFin >= $today;
+    }
+
+    public function peutAccederSauna(): bool
+    {
+        return $this->abonnement->accesSauna && $this->estAbonnementValide();
+    }
+
+    public function enregistrerSeance(): void
+    {
+        if (!$this->estAbonnementValide()) {
+            throw new RuntimeException("Abonnement invalide");
+        }
+
+        $max = $this->abonnement->maxSeancesParSemaine;
+
+        if ($max !== null && $this->seancesCetteSemaine >= $max) {
+            throw new RuntimeException("Quota atteint");
+        }
+
+        $this->seancesCetteSemaine++;
+    }
+
+    public function renouveler(int $mois): float
+    {
+        // prolonger date
+        $this->dateFin->modify("+$mois months");
+
+        $prix = $this->abonnement->prixMensuel * $mois;
+
+        if ($mois >= 4 && $mois <= 11) {
+            $prix *= 0.90;
+        } elseif ($mois == 12) {
+            $prix *= 0.80;
+        }
+
+        return $prix;
+    }
+
+    public function resetSeancesSemaine(): void
+    {
+        $this->seancesCetteSemaine = 0;
+    }
+}
+
+class SalleSport
+{
+    public string $nom;
+    public array $membres = [];
+    public int $capaciteMax;
+
+    public function inscrireMembre(Membre $m): void
+    {
+        if (count($this->membres) >= $this->capaciteMax) {
+            throw new RuntimeException("Salle pleine");
+        }
+        $this->membres[] = $m;
+    }
+
+    public function getMembresActifs(): array
+    {
+        return array_filter($this->membres, fn($m) => $m->estAbonnementValide());
+    }
+
+    public function getMembresExpirant(int $joursAvant): array
+    {
+        $today = new DateTime();
+
+        return array_filter($this->membres, function ($m) use ($today, $joursAvant) {
+            $days = $today->diff($m->dateFin)->days;
+            return $m->dateFin >= $today && $days <= $joursAvant;
+        });
+    }
+
+    public function recetteMensuelle(): float
+    {
+        $total = 0;
+
+        foreach ($this->getMembresActifs() as $m) {
+            $total += $m->abonnement->prixMensuel;
+        }
+
+        return $total;
+    }
+
+    public function statistiquesParType(): array
+    {
+        $stats = [
+            'basic' => 0,
+            'premium' => 0,
+            'vip' => 0,
+            'expire' => 0
+        ];
+
+        foreach ($this->membres as $m) {
+            if (!$m->estAbonnementValide()) {
+                $stats['expire']++;
+            } else {
+                $stats[$m->abonnement->type]++;
+            }
+        }
+
+        return $stats;
+    }
+}
 
 // Tests
 $basicAbo   = new Abonnement('basic',   199, 3, false);
